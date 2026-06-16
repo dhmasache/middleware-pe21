@@ -56,3 +56,18 @@ Keep-Alive: timeout=5
 </html>
 - **Resultado:** La API responde correctamente ante rutas no definidas (404).
 
+## Pruebas Unitarias (Testing)
+PS C:\Users\Deyvii\Documents\api-Deyvi> npm test       
+
+> api-deyvi@1.0.0 test
+> jest
+
+ PASS  src/middlewares/auth.test.ts
+ PASS  src/middlewares/logger.test.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        0.65 s, estimated 1 s
+Ran all test suites.
+PS C:\Users\Deyvii\Documents\api-Deyvi> 
