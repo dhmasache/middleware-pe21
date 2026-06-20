@@ -29,14 +29,14 @@ describe('Auth Middleware', () => {
   });
 
   it('(b) clave incorrecta -> llama a res.status(401)', () => {
-    mockRequest.headers = { 'x-api-key': 'clave-inventada' };
+    mockRequest.headers = { 'x-api-key': 'secreto-demo' };
     
     requireApiKey(mockRequest as Request, mockResponse as Response, nextFunction);
     
     expect(mockResponse.status).toHaveBeenCalledWith(401);
     expect(mockResponse.json).toHaveBeenCalled();
     expect(nextFunction).not.toHaveBeenCalled();
-  });
+  }); 
 
   it('(c) clave válida -> invoca next() sin emitir respuesta', () => {
     mockRequest.headers = { 'x-api-key': 'secreto-demo' };
