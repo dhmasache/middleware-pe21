@@ -1,0 +1,113 @@
+openapi: "3.1.0"
+info:
+  title: "Inscripciones API"
+  version: "2.0.0"
+  description: Contrato de API para la gestión de inscripciones de estudiantes.
+  license:
+    name: "MIT"
+    identifier: "MIT"
+servers:
+  - url: http://127.0.0.1:3000
+    description: "Servidor local"
+paths:
+  /v2/inscripciones:
+    post:
+      summary: Crear una nueva inscripción
+      description: Registra la inscripción de un estudiante en un periodo y materias específicas, validando el método de pago.
+      operationId: crearInscripcionV2
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InscripcionInput'
+            examples:
+              PeticionExitosa:
+                summary: Petición con datos correctos
+                value:
+                  estudianteId: "EST-90210"
+                  materias: ["Programación", "Bases de Datos"]
+                  periodoId: "PER-2026A"
+                  metodo_pago: "Efectivo"
+      responses:
+        '201':
+          description: Inscripción creada exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InscripcionExitosa'
+              example:
+                version: "v2"
+                message:
+                  estudianteId: "EST-90210"
+                  materias: 
+                    - "Programación"
+                    - "Bases de Datos"
+                  periodoId: "PER-2026A"
+                  metodo_pago: "Efectivo"
+        '400':
+          description: Error de validación (campos faltantes o método de pago inválido).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorRespuesta'
+              examples:
+                CamposFaltantes:
+                  summary: Error por campos faltantes
+                  value:
+                    error: "Campos requeridos: estudianteId, materias, periodoId, metodo_pago"
+                MetodoPagoInvalido:
+                  summary: Error por método de pago no permitido
+                  value:
+                    error: "El metodo de pago insertado debe ser, Efectivo, Trasferencia, Debito, Credito"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API Key requerida para acceder a los endpoints.
+  schemas:
+    InscripcionInput:
+      type: object
+      required:
+        - estudianteId
+        - materias
+        - periodoId
+        - metodo_pago
+      properties:
+        estudianteId:
+          type: string
+          description: ID único del estudiante.
+        materias:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: Arreglo de materias a las que se inscribe.
+        periodoId:
+          type: string
+          description: Periodo académico de la inscripción.
+        metodo_pago:
+          type: string
+          enum: ['Efectivo', 'Trasferencia', 'Debito', 'Credito']
+          description: Método de pago. Debe coincidir exactamente con los valores permitidos.
+    
+    InscripcionExitosa:
+      type: object
+      properties:
+        version:
+          type: string
+          example: "v2"
+        message:
+          $ref: '#/components/schemas/InscripcionInput'
+          
+    ErrorRespuesta:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Detalle del error de validación.
