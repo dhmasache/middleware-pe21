@@ -91,15 +91,32 @@ PS C:\Users\Deyvii\Documents\api-Deyvi>
     * **Código:** `400 Bad Request` - Si el `metodo_pago` enviado no coincide con los valores permitidos.
 
 ---
-
 ## Análisis de Versionado
 
-A continuación, se presentan dos escenarios de evolución para la API de inscripciones analizando su impacto en la compatibilidad:
+A continuación, presento dos escenarios de evolución para mi API de inscripciones, analizando el impacto de los cambios en la compatibilidad con los clientes existentes:
 
 ### 1. Cambio compatible (Backwards-compatible)
-* **Descripción:** Agregar un nuevo campo opcional llamado `fecha_registro` en la respuesta exitosa (201) de la ruta `POST /v2/inscripciones`.
-* **Justificación Técnica:** Este es un cambio seguro. Los clientes que consumen la versión `v2` actualmente esperan la estructura base (`estudianteId`, `materias`, `periodoId`, `metodo_pago`). Si reciben un campo adicional que no conocen, simplemente lo ignorarán y su código no se romperá.
+* **Descripción:** Agregar un nuevo campo opcional llamado `fecha_registro` dentro del objeto `message` en la respuesta exitosa (`201 Created`) de la ruta `POST /v2/inscripciones`.
+* **Justificación Técnica:** Este es un cambio seguro (no destructivo). Los clientes que consumen actualmente la versión `v2` esperan la estructura base (`estudianteId`, `materias`, `periodoId`, `metodo_pago`). Si el servidor empieza a enviar una propiedad adicional que ellos no esperan, sus sistemas simplemente la ignorarán y su lógica seguirá funcionando sin romperse.
 
 ### 2. Cambio que rompe la compatibilidad (Breaking change)
-* **Descripción:** Modificar el campo `materias` en el body del `POST /v2/inscripciones`. Actualmente es un arreglo de strings, pero se propone cambiarlo a un arreglo de objetos (ej. `[{"id": "MAT-1", "nombre": "Materia1"}]`).
-* **Justificación Técnica:** Este es un *breaking change* severo. Cualquier cliente actual que envíe su petición con el formato anterior (arreglo de strings) recibirá automáticamente un error 400 de validación de nuestra API. Para implementar este cambio estructural sin romper los sistemas en producción, sería obligatorio crear una nueva versión de la API (ej. `/v3/inscripciones`).
+* **Descripción:** Modificar la estructura del campo `materias` en el cuerpo (body) de la petición `POST /v2/inscripciones`. Actualmente se recibe como un arreglo de strings, y se propone cambiarlo a un arreglo de objetos (por ejemplo: `[{"id": "MAT-1", "nombre": "Materia1"}]`).
+* **Justificación Técnica:** Este cambio es crítico y rompe la retrocompatibilidad (*breaking change*). Cualquier cliente existente que intente enviar datos con el formato antiguo (arreglo de cadenas) recibirá inmediatamente un error `400 Bad Request` debido a las reglas de validación de mi API. Para poder implementar una reestructuración de este tipo sin afectar los sistemas que ya están en producción, es obligatorio desplegar una nueva versión de la ruta, como `/v3/inscripciones`.
+
+---
+
+## Validación del Contrato OpenAPI
+
+Para asegurar que el diseño de la API cumple rigurosamente con los estándares oficiales de OpenAPI 3.1.0, utilicé la herramienta **Redocly CLI** para auditar y validar el archivo `openapi.yaml`. 
+
+El resultado de la verificación en mi terminal local fue completamente exitoso, confirmando que la descripción de la API es válida y está libre de errores de sintaxis o estructura:
+
+PS C:\Users\Deyvii\Documents\api-Deyvi> npx @redocly/cli lint openapi.yaml
+No configurations were provided -- using built in recommended configuration by default.
+
+validating openapi.yaml...
+openapi.yaml: validated in 36ms
+
+Woohoo! Your API description is valid. 🎉
+
+PS C:\Users\Deyvii\Documents\api-Deyvi> 
