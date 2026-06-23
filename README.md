@@ -120,3 +120,33 @@ openapi.yaml: validated in 36ms
 Woohoo! Your API description is valid. 🎉
 
 PS C:\Users\Deyvii\Documents\api-Deyvi> 
+
+## En esta práctica se implementó una estrategia de versionado basada en prefijos en la URL (/v1 y /v2), permitiendo la coexistencia de dos etapas del producto con reglas de negocio y niveles de seguridad diferentes:
+
+1. Endpoint /health (Público)
+Descripción: Verifica la disponibilidad y el estado actual de la API devolviendo una marca de tiempo.
+
+Seguridad: Público. No requiere autenticación.
+
+Respuesta de éxito: 200 OK.
+
+2. Versión 1: /v1/inscripciones (Público / Legado)
+Descripción: Permite el registro de inscripciones con una estructura básica que solo exige el ID del estudiante, las materias y el periodo académico.
+
+Seguridad: Público. Está mapeado en el enrutador antes de activar el middleware de restricción de accesos.
+
+Regla de negocio: No solicita ni valida un método de pago.
+
+Respuesta de éxito: 201 Created.
+
+3. Versión 2: /v2/inscripciones (Privado / Actual)
+Descripción: Endpoint optimizado para producción que añade capas críticas de validación y control de acceso al proceso de inscripción.
+
+Seguridad: Privado. Requiere obligatoriamente que se envíe la cabecera x-api-key gestionada por el middleware de autenticación.
+
+Regla de negocio: Hace obligatorio el campo metodo_pago y restringe los valores únicamente a un listado permitido (Efectivo, Trasferencia, Debito, Credito). Si el método no es válido o faltan campos, el servidor interrumpe la petición.
+
+Respuestas: 201 Created para flujos exitosos y 400 Bad Request para fallos de validación.
+
+## Reflexion de cambio de contrato si otro equipo la quisiera usar
+Si otro equipo fuera a consumir esta API a partir de mañana, el cambio principal en el contrato sería estandarizar por completo el formato de las respuestas de error (creando un esquema global y reutilizable para los errores 400, 401 y 500) para que los consumidores puedan manejarlos de forma predecible en su frontend. También añadiría descripciones detalladas a cada propiedad de los esquemas, ejemplos reales de producción para cada caso de uso y de ser posible una URL de un servidor de pruebas (Staging) en la sección servers para que puedan realizar pruebas de integración con datos ficticios sin alterar el entorno de desarrollo local.
