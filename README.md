@@ -150,3 +150,61 @@ Respuestas: 201 Created para flujos exitosos y 400 Bad Request para fallos de va
 
 ## Reflexion de cambio de contrato si otro equipo la quisiera usar
 Si otro equipo fuera a consumir esta API a partir de mañana, el cambio principal en el contrato sería estandarizar por completo el formato de las respuestas de error (creando un esquema global y reutilizable para los errores 400, 401 y 500) para que los consumidores puedan manejarlos de forma predecible en su frontend. También añadiría descripciones detalladas a cada propiedad de los esquemas, ejemplos reales de producción para cada caso de uso y de ser posible una URL de un servidor de pruebas (Staging) en la sección servers para que puedan realizar pruebas de integración con datos ficticios sin alterar el entorno de desarrollo local.
+
+
+
+
+README.md — seccion Seguridad JWT (Markdown)
+## Seguridad JWT (PE-2.3)
+
+### Generar un token de prueba
+
+```bash
+# Con el secreto por defecto del laboratorio:
+TOKEN=$(node generate-token.mjs)
+
+# Con secreto personalizado:
+JWT_SECRET=mi-secreto-largo TOKEN=$(node generate-token.mjs)
+```
+
+### Probar el servicio
+
+```bash
+# Peticion valida (esperado: 201)
+curl -X POST http://localhost:3000/v2/inscripciones \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"estudianteId":"uuid-123","materias":["LTI_05A_458"],"periodoId":"2026-1","payment_method":"scholarship"}'
+
+
+
+# Token invalido (esperado: 401)
+curl -X POST http://localhost:3000/v2/inscripciones \
+  -H "Authorization: Bearer token.invalido.xxx"
+
+
+# alg:none: esperado 401 Unauthorized
+curl -X POST http://localhost:3000/v2/inscripciones \
+  -H "Authorization: Bearer token.
+
+```
+
+### Variables de entorno
+
+Copia `.env.example` a `.env` y configura `JWT_SECRET` con un valor secreto largo.
+
+
+# Capturas de validación
+
+![Prueba 1](./docs/screenshots/PE23_prueba1_201.png)
+
+![Prueba 2](./docs/screenshots/PE23_prueba2_401.png)
+
+![Prueba 3](./docs/screenshots/PE23_prueba3_401.png)
+
+
+
+
+
+
+
